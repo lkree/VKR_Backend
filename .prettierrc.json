@@ -1,0 +1,21 @@
+{
+  "bracketSpacing": true,
+  "printWidth": 120,
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "es5",
+  "filepath": "src",
+  "arrowParens": "avoid",
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports"
+  ],
+  "importOrder": [
+    "<THIRD_PARTY_MODULES>",
+    "~/entities.*",
+    "~/shared.*",
+    "^[.]{2}[\\/].*",
+    "^[.]{1}[\\/].*"
+  ],
+  "importOrderSeparation": true,
+  "importOrderCaseInsensitive": true
+}
