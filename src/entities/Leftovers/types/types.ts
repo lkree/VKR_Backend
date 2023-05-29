@@ -1,3 +1,13 @@
+interface viewLeftoverFilling {
+  Номенклатура: string;
+  'Ед. изм.': string;
+  Артикул?: string;
+  Приход?: number;
+  Расход?: number;
+  'Начальный остаток'?: number;
+  'Конечный остаток'?: number;
+}
+
 export interface Leftover {
   cityName: string;
   leftovers: Array<{
@@ -15,13 +25,9 @@ export type Leftovers = Array<Leftover>;
 
 export interface ViewLeftover {
   cityName: string;
-  leftovers: Array<{
-    Номенклатура: string;
-    'Ед. изм.': string;
-    Артикул?: string;
-    Приход?: number;
-    Расход?: number;
-    'Начальный остаток'?: number;
-    'Конечный остаток'?: number;
-  }>;
+  leftovers: Array<viewLeftoverFilling>;
+}
+
+export interface FileLeftovers {
+  [cityName: string]: Array<viewLeftoverFilling>;
 }

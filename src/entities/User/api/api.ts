@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
 
-import { ApiError } from '~/entities/ApiError/index.js';
 import { tokenService } from '~/entities/Token/index.js';
 
 import { AccessLevel } from '~/shared/const/index.js';
+import { ApiError } from '~/shared/lib/ApiError/index.js';
 
 import { userModel, UserDto, TUserDto } from '../model/index.js';
 
@@ -61,7 +61,7 @@ class UserService {
     return { ...tokens, user: userDto };
   }
 
-  async getAllUsers() {
+  async getAll() {
     return userModel.find().then(r => r.map(({ email, accessLevel }) => ({ email, accessLevel })));
   }
 }

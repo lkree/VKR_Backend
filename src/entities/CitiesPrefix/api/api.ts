@@ -1,4 +1,4 @@
-import { ApiError } from '~/entities/ApiError/index.js';
+import { ApiError } from '~/shared/lib/ApiError/index.js';
 
 import { citiesPrefixModel } from '../model/index.js';
 
@@ -8,7 +8,7 @@ class CitiesPrefixService {
       throw ApiError.BadRequest(`Город с таким префиксом ${prefix} уже существует`);
     }
 
-    await citiesPrefixModel.create({ name: city, prefix });
+    await citiesPrefixModel.create({ name: city, prefix: prefix.toLowerCase() });
 
     return this.getAll();
   }
@@ -21,6 +21,10 @@ class CitiesPrefixService {
 
   async getAll() {
     return citiesPrefixModel.find().then(r => r.map(({ name, prefix }) => [name, prefix]));
+  }
+
+  _getCitiesSettings() {
+    return this.getAll().then(d => d.reduce((result, it) => ({ ...result, [it[1]!]: it[0] }), {}));
   }
 }
 

@@ -94,3 +94,5 @@ export const transformObjectWithStringsToNumbers = (d: Record<string, any>) =>
 export const toSnakeCase = <T extends Record<string, any>>(data: T): T => forEachKey(data, lodash.snakeCase) as T;
 
 export const toCamelCase = <T extends Record<string, any>>(data: T): T => forEachKey(data, lodash.camelCase) as T;
+
+export const isEqual = <T, K>(a: T, b: K) => JSON.parse(JSON.stringify(a)) === JSON.parse(JSON.stringify(b));

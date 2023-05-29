@@ -1,35 +1,29 @@
-import { RequestParamHandler } from 'express-serve-static-core';
+import type { NextFunction, Request, Response } from 'express';
+
+import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
+import { RequestPropsValidation } from '~/shared/lib/decorators/index.js';
 
 import { citiesPrefixService } from '../api/index.js';
+import { cityNamePrefixValidationObject, cityPrefixValidationObject } from '../lib/helpers/index.js';
 
-type IPrefixController = { [Method in keyof typeof citiesPrefixService]: RequestParamHandler };
+class CitiesPrefixController extends BaseController implements Controller<typeof citiesPrefixService> {
+  @RequestPropsValidation(cityNamePrefixValidationObject)
+  async add(req: Request, res: Response, __: NextFunction) {
+    const { cityName, cityPrefix } = req.body;
 
-export const citiesPrefixController: IPrefixController = {
-  add: async (req, res, next) => {
-    try {
-      const { cityName, cityPrefix } = req.body;
+    res.json(await citiesPrefixService.add(cityName, cityPrefix));
+  }
 
-      return res.json(await citiesPrefixService.add(cityName, cityPrefix));
-    } catch (e) {
-      next(e);
-    }
-  },
+  @RequestPropsValidation(cityPrefixValidationObject)
+  async delete(req: Request, res: Response, __: NextFunction) {
+    const { cityPrefix } = req.body;
 
-  delete: async (req, res, next) => {
-    try {
-      const { cityPrefix } = req.body;
+    res.json(await citiesPrefixService.delete(cityPrefix));
+  }
 
-      return res.json(await citiesPrefixService.delete(cityPrefix));
-    } catch (e) {
-      next(e);
-    }
-  },
+  async getAll(_: Request, res: Response, __: NextFunction) {
+    res.json(await citiesPrefixService.getAll());
+  }
+}
 
-  getAll: async (_, res, next) => {
-    try {
-      return res.json(await citiesPrefixService.getAll());
-    } catch (e) {
-      next(e);
-    }
-  },
-};
+export const citiesPrefixController = new CitiesPrefixController();

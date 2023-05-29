@@ -1,8 +1,7 @@
-import { ApiError } from '~/entities/ApiError/index.js';
-
+import { ApiError } from '~/shared/lib/ApiError/index.js';
 import { isObject } from '~/shared/lib/helpers/index.js';
 
-import type { Leftover, ViewLeftover } from '../../types/index.js';
+import type { FileLeftovers, Leftover, ViewLeftover } from '../../types/index.js';
 
 import { assertLeftover, assertLeftovers } from './typeGuards.js';
 
@@ -53,3 +52,6 @@ export const dbModelIntoView = (model: Leftover): ViewLeftover => ({
     ...(l.consumption && { Расход: l.consumption }),
   })),
 });
+
+export const fileLeftoversToDB = (leftovers: FileLeftovers) =>
+  Object.entries(leftovers).map(([key, value]) => viewModelIntoDB({ cityName: key, leftovers: value }));

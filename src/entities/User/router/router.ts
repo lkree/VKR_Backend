@@ -1,4 +1,4 @@
-import { RequestHandler, Router } from 'express';
+import { Router } from 'express';
 
 import { authMiddleware } from '~/entities/AuthMiddleware/index.js';
 
@@ -7,11 +7,11 @@ import { userController } from '../controller/index.js';
 
 const router = Router();
 
-router.post(Methods.Registration, userController.registration as RequestHandler);
-router.post(Methods.Login, userController.login as RequestHandler);
-router.post(Methods.Logout, userController.logout as RequestHandler);
-router.get(Methods.Refresh, userController.refresh as RequestHandler);
-router.get(Methods.Session, userController.session as RequestHandler);
-router.get(Methods.Users, authMiddleware, userController.getUsers as RequestHandler);
+router.post(Methods.Registration, (...props) => void userController.registration(...props));
+router.post(Methods.Login, (...props) => void userController.login(...props));
+router.post(Methods.Logout, (...props) => void userController.logout(...props));
+router.get(Methods.Refresh, (...props) => void userController.refresh(...props));
+router.get(Methods.Session, (...props) => void userController.session(...props));
+router.get(Methods.GetAll, authMiddleware, (...props) => void userController.getAll(...props));
 
 export { router };

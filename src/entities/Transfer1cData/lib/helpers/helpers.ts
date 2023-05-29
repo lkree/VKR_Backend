@@ -1,3 +1,5 @@
+import lodash from 'lodash';
+
 import { isString } from '~/shared/lib/helpers/index.js';
 import type { Nullable } from '~/shared/lib/ts/index.js';
 
@@ -7,7 +9,9 @@ export const computeCityKey = (productName: string): Nullable<CitiesKeys | strin
   const indexCityStarts = productName.lastIndexOf('(');
   const indexCityEnds = productName.lastIndexOf(')');
 
-  if (indexCityStarts >= 0 && indexCityEnds >= 0) return productName.slice(indexCityStarts + 1, indexCityEnds);
+  if (indexCityStarts >= 0 && indexCityEnds >= 0) {
+    return productName.slice(indexCityStarts + 1, indexCityEnds).toLowerCase();
+  }
 
   return null;
 };
@@ -15,7 +19,7 @@ export const computeCityKey = (productName: string): Nullable<CitiesKeys | strin
 export const computeProductName = (productNameWithCity: string, cityKey: ReturnType<typeof computeCityKey>) => {
   if (!isString(cityKey) || !isString(productNameWithCity)) return productNameWithCity;
 
-  const indexOfCityStarts = productNameWithCity.lastIndexOf(cityKey);
+  const indexOfCityStarts = productNameWithCity.lastIndexOf(lodash.upperFirst(cityKey));
 
   return (
     productNameWithCity.slice(0, indexOfCityStarts - 2) +

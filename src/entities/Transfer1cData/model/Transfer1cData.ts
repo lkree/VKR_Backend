@@ -1,43 +1,51 @@
 import { computeCityKey, computeProductName } from '~/entities/Transfer1cData/lib/helpers/index.js';
 
-import { isArray, isString } from '~/shared/lib/helpers/index.js';
+import { isArray, isEqual, isString } from '~/shared/lib/helpers/index.js';
 
-import { CITIES_SETTINGS, CITY_ROW_NAME } from '../const/index.js';
+import { CITY_ROW_NAME, SHARED_KEY } from '../const/index.js';
 import { isCityKey } from '../lib/helpers/typeGuards.js';
-import type { Cities } from '../types/index.js';
+import type { Cities, CitiesSettings } from '../types/index.js';
 
-export const Transfer1cData = (data: Array<Record<string, string | number>>) => {
+export const Transfer1cData = <T extends CitiesSettings>(
+  data: Array<Record<string, string | number>>,
+  citiesSettings: T
+) => {
   if (!isArray(data)) return null;
 
-  return data.reduce(
-    (result, oneLineData) => {
-      const productNameWithCity = oneLineData[CITY_ROW_NAME];
+  return Object.entries(
+    data.reduce(
+      (result, oneLineData) => {
+        const productNameWithCity = oneLineData[CITY_ROW_NAME];
 
-      if (!productNameWithCity || !isString(productNameWithCity)) return result;
+        if (!productNameWithCity || !isString(productNameWithCity)) return result;
 
-      const cityKey = computeCityKey(productNameWithCity);
-      const productName = computeProductName(productNameWithCity, cityKey);
-      const resultData = { ...oneLineData, [CITY_ROW_NAME]: productName };
+        const cityKey = computeCityKey(productNameWithCity);
+        const productName = computeProductName(productNameWithCity, cityKey);
+        const resultData = { ...oneLineData, [CITY_ROW_NAME]: productName };
 
-      if (cityKey) {
-        if (isCityKey(cityKey)) {
-          result[CITIES_SETTINGS[cityKey]]!.push(resultData);
+        if (cityKey && isCityKey(cityKey, citiesSettings)) {
+          if (!(citiesSettings[cityKey]! in result)) result[citiesSettings[cityKey]!] = [];
+
+          if (!result[citiesSettings[cityKey]!]!.find(it => isEqual(it, resultData))) {
+            result[citiesSettings[cityKey]!]!.push(resultData);
+          }
         } else {
-          if (result[cityKey]) result[cityKey]!.push(resultData);
-          else result[cityKey] = [resultData];
+          if (!result[SHARED_KEY]) result[SHARED_KEY] = [];
+
+          if (!result[SHARED_KEY].find(it => it[CITY_ROW_NAME] === resultData[CITY_ROW_NAME])) {
+            result[SHARED_KEY].push(resultData);
+          }
         }
-      } else {
-        result[CITIES_SETTINGS.Общее]!.push(resultData);
-      }
 
-      return result;
-    },
-    Object.values(CITIES_SETTINGS).reduce((r, v) => {
-      r[v] = [];
+        return result;
+      },
+      Object.values(citiesSettings).reduce((r, v) => {
+        r[v] = [];
 
-      return r;
-    }, {} as Record<Cities | string, Array<Record<string, string>>>)
-  );
+        return r;
+      }, {} as Record<Cities | string, Array<Record<string, string>>>)
+    )
+  ).reduce((r, [key, value]) => ({ ...r, ...(value.length && { [key]: value }) }), {});
 };
 
 // export const Transfer1cData = () => {

@@ -1,4 +1,3 @@
-import type { CITIES_SETTINGS } from '../const/index.js';
-
-export type CitiesKeys = keyof typeof CITIES_SETTINGS;
-export type Cities = (typeof CITIES_SETTINGS)[CitiesKeys];
+export type CitiesSettings = Record<string, string>;
+export type CitiesKeys = keyof CitiesSettings;
+export type Cities = CitiesSettings[CitiesKeys];

@@ -1,5 +1,4 @@
-import { ApiError } from '~/entities/ApiError/index.js';
-
+import { ApiError } from '~/shared/lib/ApiError/index.js';
 import { isArray, isObject } from '~/shared/lib/helpers/index.js';
 
 import type { ViewLeftover } from '../../types/index.js';

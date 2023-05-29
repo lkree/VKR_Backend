@@ -6,6 +6,7 @@
   "trailingComma": "es5",
   "filepath": "src",
   "arrowParens": "avoid",
+  "importOrderParserPlugins": ["typescript", "decorators-legacy"],
   "plugins": [
     "@trivago/prettier-plugin-sort-imports"
   ],

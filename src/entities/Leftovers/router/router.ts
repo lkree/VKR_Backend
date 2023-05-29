@@ -1,17 +1,22 @@
-import express, { RequestHandler } from 'express';
+import { Router } from 'express';
 
 import { authMiddleware } from '~/entities/AuthMiddleware/index.js';
 
 import { Methods } from '../const/index.js';
 import { leftoverController } from '../controller/index.js';
 
-const router = express.Router();
+const router = Router();
 
-router.post(Methods.Add, authMiddleware, leftoverController.add as RequestHandler);
-router.post(Methods.Update, authMiddleware, leftoverController.update as RequestHandler);
-router.post(Methods.Recreate, authMiddleware, leftoverController.recreate as RequestHandler);
-router.post(Methods.DeleteOne, authMiddleware, leftoverController.deleteOne as RequestHandler);
-router.get(Methods.DeleteAll, authMiddleware, leftoverController.deleteAll as RequestHandler);
-router.get(Methods.GetAll, authMiddleware, leftoverController.getAll as RequestHandler);
+router.post(Methods.Add, authMiddleware, (...props) => void leftoverController.add(...props));
+router.post(Methods.Update, authMiddleware, (...props) => void leftoverController.update(...props));
+router.post(Methods.WriteAll, authMiddleware, (...props) => void leftoverController.writeAll(...props));
+router.post(Methods.DeleteOne, authMiddleware, (...props) => void leftoverController.deleteOne(...props));
+router.get(Methods.DeleteAll, authMiddleware, (...props) => void leftoverController.deleteAll(...props));
+router.get(Methods.GetAll, authMiddleware, (...props) => void leftoverController.getAll(...props));
+router.get(
+  Methods.GetUniqueProducts,
+  authMiddleware,
+  (...props) => void leftoverController.getUniqueProducts(...props)
+);
 
 export { router };

@@ -1,7 +1,8 @@
 import type { RequestHandler } from 'express-serve-static-core';
 
-import { ApiError } from '~/entities/ApiError/index.js';
 import { tokenService } from '~/entities/Token/index.js';
+
+import { ApiError } from '~/shared/lib/ApiError/index.js';
 
 export const authMiddleware: RequestHandler = (req, _, next) => {
   try {
@@ -19,6 +20,6 @@ export const authMiddleware: RequestHandler = (req, _, next) => {
 
     next();
   } catch (e) {
-    return next(ApiError.UnauthorizedError());
+    next(ApiError.UnauthorizedError());
   }
 };

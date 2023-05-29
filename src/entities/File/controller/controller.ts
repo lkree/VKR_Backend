@@ -1,42 +1,30 @@
-import type { RequestParamHandler } from 'express-serve-static-core';
+import type { NextFunction, Request, Response } from 'express';
+import type { UploadedFile } from 'express-fileupload';
 
-import { ApiError } from '~/entities/ApiError/index.js';
-
-import { isArray, isObject } from '~/shared/lib/helpers/index.js';
+import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
+import { RequestAssert, RequestDataFields } from '~/shared/lib/decorators/index.js';
 
 import { fileService } from '../api/index.js';
 import { FRONTEND_FILE_NAME } from '../const/index.js';
+import { fileAssertObject } from '../lib/helpers/index.js';
 
-type FileController = { [Method in keyof typeof fileService]: RequestParamHandler };
+class FileController extends BaseController implements Controller<typeof fileService> {
+  @RequestAssert(fileAssertObject, RequestDataFields.Files)
+  async upload(req: Request, res: Response, __: NextFunction) {
+    res.json(await fileService.upload(req.files![FRONTEND_FILE_NAME] as UploadedFile));
+  }
 
-export const fileController: FileController = {
-  upload: async (req, res, next) => {
-    try {
-      if (!req.files && !isObject(req.files)) throw ApiError.BadRequest('не передан файл');
+  async acceptFile(_: Request, res: Response, __: NextFunction) {
+    res.json(await fileService.acceptFile());
+  }
 
-      const { [FRONTEND_FILE_NAME]: file } = req.files;
+  async deleteExisting(_: Request, res: Response, __: NextFunction) {
+    res.json(await fileService.deleteExisting());
+  }
 
-      if (!file || isArray(file)) throw ApiError.BadRequest('файл не пришёл или передано несколько файлов');
+  async getFileInfo(_: Request, res: Response, __: NextFunction) {
+    res.json(await fileService.getFileInfo());
+  }
+}
 
-      return res.json(await fileService.upload(file));
-    } catch (e) {
-      next(e);
-    }
-  },
-
-  deleteExisting: async (_, res, next) => {
-    try {
-      return res.json(await fileService.deleteExisting());
-    } catch (e) {
-      next(e);
-    }
-  },
-
-  getFileInfo: async (_, res, next) => {
-    try {
-      return res.json(await fileService.getFileInfo());
-    } catch (e) {
-      next(e);
-    }
-  },
-};
+export const fileController = new FileController();

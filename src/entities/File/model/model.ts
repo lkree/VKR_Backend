@@ -4,5 +4,6 @@ export const fileModel = model(
   'file-data',
   new Schema({
     uploadDate: { type: Number, required: true },
+    lastUpdatedDate: { type: Number },
   })
 );

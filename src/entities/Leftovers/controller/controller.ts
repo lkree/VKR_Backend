@@ -1,59 +1,49 @@
-import type { RequestParamHandler } from 'express-serve-static-core';
+import type { NextFunction, Request, Response } from 'express';
+
+import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
 
 import { leftoverService } from '../api/index.js';
 import { dbModelIntoView, getLeftover, getLeftovers } from '../lib/helpers/index.js';
-import type { Leftovers } from '../types/index.js';
-
-type IPrefixController = { [Method in keyof typeof leftoverService]: RequestParamHandler };
+import type { FileLeftovers, Leftovers } from '../types/index.js';
 
 const transformDBIntoView = (leftovers: Promise<Leftovers>) => leftovers.then(d => d.map(dbModelIntoView));
 
-export const leftoverController: IPrefixController = {
-  add: async (req, res, next) => {
-    try {
-      return res.json(await transformDBIntoView(leftoverService.add(getLeftovers(req.body))));
-    } catch (e) {
-      next(e);
-    }
-  },
+class LeftoverController extends BaseController implements Controller<typeof leftoverService> {
+  async add(req: Request, res: Response, __: NextFunction) {
+    res.json(await transformDBIntoView(leftoverService.add(getLeftovers(req.body))));
+  }
 
-  deleteOne: async (req, res, next) => {
-    try {
-      return res.json(await transformDBIntoView(leftoverService.deleteOne(getLeftover(req.body))));
-    } catch (e) {
-      next(e);
-    }
-  },
+  async writeAll(req: Request, res: Response, __: NextFunction) {
+    res.json(await transformDBIntoView(leftoverService.writeAll(getLeftovers(req.body))));
+  }
 
-  recreate: async (req, res, next) => {
-    try {
-      return res.json(await transformDBIntoView(leftoverService.recreate(getLeftovers(req.body))));
-    } catch (e) {
-      next(e);
-    }
-  },
+  async update(req: Request, res: Response, __: NextFunction) {
+    res.json(await transformDBIntoView(leftoverService.update(getLeftovers(req.body))));
+  }
 
-  update: async (req, res, next) => {
-    try {
-      return res.json(await transformDBIntoView(leftoverService.update(getLeftovers(req.body))));
-    } catch (e) {
-      next(e);
-    }
-  },
+  async deleteOne(req: Request, res: Response, __: NextFunction) {
+    res.json(await transformDBIntoView(leftoverService.deleteOne(getLeftover(req.body))));
+  }
 
-  deleteAll: async (_, res, next) => {
-    try {
-      return res.json(await transformDBIntoView(leftoverService.deleteAll()));
-    } catch (e) {
-      next(e);
-    }
-  },
+  async deleteAll(_: Request, res: Response, __: NextFunction) {
+    res.json(await transformDBIntoView(leftoverService.deleteAll()));
+  }
 
-  getAll: async (_, res, next) => {
-    try {
-      return res.json(await transformDBIntoView(leftoverService.getAll()));
-    } catch (e) {
-      next(e);
-    }
-  },
-};
+  async getUniqueProducts(_: Request, res: Response, __: NextFunction) {
+    res.json(await leftoverService.getUniqueProducts());
+  }
+
+  async getAll(_: Request, res: Response, __: NextFunction) {
+    res.json(await transformDBIntoView(leftoverService.getAll()));
+  }
+
+  _getAll() {
+    return leftoverService.getAll();
+  }
+
+  _saveLeftoversFromFile(fileLeftovers: FileLeftovers) {
+    return leftoverService._saveLeftoversFromFile(fileLeftovers);
+  }
+}
+
+export const leftoverController = new LeftoverController();

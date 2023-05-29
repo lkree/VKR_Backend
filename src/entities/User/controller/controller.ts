@@ -1,89 +1,72 @@
-import { RequestParamHandler } from 'express-serve-static-core';
+import type { NextFunction, Request, Response } from 'express';
 
 import { tokenService } from '~/entities/Token/index.js';
 import { userService } from '~/entities/User/index.js';
 
-interface IUserController {
-  registration: RequestParamHandler;
-  login: RequestParamHandler;
-  logout: RequestParamHandler;
-  refresh: RequestParamHandler;
-  getUsers: RequestParamHandler;
-  session: RequestParamHandler;
-}
+import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
+import { RequestDataFields, RequestPropsValidation } from '~/shared/lib/decorators/index.js';
+
+import {
+  accessTokenValidationObject,
+  emailPasswordValidationObject,
+  refreshTokenValidationObject,
+} from '../lib/helpers/index.js';
 
 const cookieParameters = { maxAge: 10 * 365 * 24 * 60 * 60 * 1000, httpOnly: true };
 
-export const userController: IUserController = {
-  registration: async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-      const userData = await userService.registration(email, password);
+class UserController extends BaseController implements Controller<typeof userService> {
+  @RequestPropsValidation(emailPasswordValidationObject)
+  async registration(req: Request, res: Response, __: NextFunction) {
+    const { email, password } = req.body;
+    const userData = await userService.registration(email, password);
 
-      res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      return res.json(userData);
-    } catch (e) {
-      next(e);
-    }
-  },
+    res.cookie('refreshToken', userData.refreshToken, cookieParameters);
 
-  login: async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-      const userData = await userService.login(email, password);
+    res.json(userData);
+  }
 
-      res.cookie('refreshToken', userData.refreshToken, cookieParameters);
-      res.cookie('accessToken', userData.accessToken, cookieParameters);
+  @RequestPropsValidation(emailPasswordValidationObject)
+  async login(req: Request, res: Response, __: NextFunction) {
+    const { email, password } = req.body;
+    const userData = await userService.login(email, password);
 
-      return res.json(userData);
-    } catch (e) {
-      next(e);
-    }
-  },
+    res.cookie('refreshToken', userData.refreshToken, cookieParameters);
+    res.cookie('accessToken', userData.accessToken, cookieParameters);
 
-  session: (req, res, next) => {
-    try {
-      const { accessToken } = req.cookies;
+    res.json(userData);
+  }
 
-      return res.json(tokenService.validateAccessToken(accessToken));
-    } catch (e) {
-      next(e);
-    }
-  },
+  @RequestPropsValidation(accessTokenValidationObject, RequestDataFields.Cookies)
+  session(req: Request, res: Response, __: NextFunction) {
+    const { accessToken } = req.cookies;
 
-  logout: async (req, res, next) => {
-    try {
-      const { refreshToken } = req.cookies;
-      const token = await userService.logout(refreshToken);
+    res.json(tokenService.validateAccessToken(accessToken));
+  }
 
-      res.clearCookie('refreshToken');
-      res.clearCookie('accessToken');
+  @RequestPropsValidation(refreshTokenValidationObject, RequestDataFields.Cookies)
+  async logout(req: Request, res: Response, __: NextFunction) {
+    const { refreshToken } = req.cookies;
+    const token = await userService.logout(refreshToken);
 
-      return res.json(token);
-    } catch (e) {
-      next(e);
-    }
-  },
+    res.clearCookie('refreshToken');
+    res.clearCookie('accessToken');
 
-  refresh: async (req, res, next) => {
-    try {
-      const { refreshToken } = req.cookies;
-      const userData = await userService.refresh(refreshToken);
+    res.json(token);
+  }
 
-      res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-      return res.json(userData);
-    } catch (e) {
-      next(e);
-    }
-  },
+  @RequestPropsValidation(refreshTokenValidationObject, RequestDataFields.Cookies)
+  async refresh(req: Request, res: Response, __: NextFunction) {
+    const { refreshToken } = req.cookies;
+    const userData = await userService.refresh(refreshToken);
 
-  getUsers: async (_, res, next) => {
-    try {
-      const users = await userService.getAllUsers();
+    res.cookie('refreshToken', userData.refreshToken, cookieParameters);
 
-      return res.json(users);
-    } catch (e) {
-      next(e);
-    }
-  },
-};
+    res.json(userData);
+  }
+
+  async getAll(_: Request, res: Response, __: NextFunction) {
+    res.json(await userService.getAll());
+  }
+}
+
+export const userController = new UserController();
