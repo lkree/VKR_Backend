@@ -7,7 +7,7 @@
     "moduleResolution": "Node16",
     "allowSyntheticDefaultImports": true,
     "lib": [
-      "es2021"
+      "ESNext"
     ],
     "paths": {
       "~/*": [

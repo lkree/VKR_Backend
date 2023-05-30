@@ -3,8 +3,10 @@ import type { NextFunction, Request, Response } from 'express';
 import { tokenService } from '~/entities/Token/index.js';
 import { userService } from '~/entities/User/index.js';
 
+import { ApiError } from '~/shared/lib/ApiError/index.js';
 import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
 import { RequestDataFields, RequestPropsValidation } from '~/shared/lib/decorators/index.js';
+import { isString } from '~/shared/lib/helpers/index.js';
 
 import {
   accessTokenValidationObject,
@@ -40,7 +42,10 @@ class UserController extends BaseController implements Controller<typeof userSer
   session(req: Request, res: Response, __: NextFunction) {
     const { accessToken } = req.cookies;
 
-    res.json(tokenService.validateAccessToken(accessToken));
+    const result = tokenService.validateAccessToken(accessToken);
+
+    if (result) res.json(result);
+    else throw ApiError.UnauthorizedError();
   }
 
   @RequestPropsValidation(refreshTokenValidationObject, RequestDataFields.Cookies)
@@ -62,6 +67,22 @@ class UserController extends BaseController implements Controller<typeof userSer
     res.cookie('refreshToken', userData.refreshToken, cookieParameters);
 
     res.json(userData);
+  }
+
+  @RequestPropsValidation(refreshTokenValidationObject, RequestDataFields.Cookies)
+  @RequestPropsValidation({ emailForMailings: isString, email: isString })
+  async update(req: Request, res: Response, __: NextFunction) {
+    const { accessToken } = req.cookies;
+
+    const result = tokenService.validateAccessToken(accessToken);
+
+    if (result) {
+      const { emailForMailings, email } = req.body;
+
+      res.json(await userService.update({ emailForMailings, email }));
+    } else {
+      throw ApiError.UnauthorizedError();
+    }
   }
 
   async getAll(_: Request, res: Response, __: NextFunction) {

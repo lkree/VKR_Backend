@@ -12,6 +12,10 @@ export class ApiError extends Error {
     return new ApiError(401, 'Пользователь не авторизован');
   }
 
+  static NoAdminRightsError() {
+    return new ApiError(401, 'Недостаточно прав для данного действия');
+  }
+
   static BadRequest(message: string, errors = []) {
     return new ApiError(400, message, errors);
   }

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { DeleteResult } from 'mongodb';
+import type { DeleteResult } from 'mongodb';
+import type { Types } from 'mongoose';
 
 import { tokenModel } from '../model/index.js';
 
@@ -27,7 +28,7 @@ class TokenService {
     }
   }
 
-  async saveToken(userId: string, refreshToken: string) {
+  async saveToken(userId: Types.ObjectId, refreshToken: string) {
     const tokenData = await tokenModel.findOne({ user: userId });
 
     if (tokenData) {

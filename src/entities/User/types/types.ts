@@ -1,7 +1,5 @@
-import { AccessLevel } from '~/shared/const/index.js';
+import type { GetMongooseScheme } from '~/shared/lib/ts/index.js';
 
-export interface User {
-  email: string;
-  password: string;
-  accessLevel: AccessLevel;
-}
+import type { userModel } from '../model/index.js';
+
+export type User = GetMongooseScheme<typeof userModel>;

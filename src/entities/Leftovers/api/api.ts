@@ -1,8 +1,7 @@
 import { fileLeftoversToDB } from '~/entities/Leftovers/lib/helpers/index.js';
 
 import { leftoversModel } from '../model/index.js';
-import type { Leftovers, Leftover } from '../types/index.js';
-import { FileLeftovers } from '../types/index.js';
+import type { Leftovers, Leftover, FileLeftovers } from '../types/index.js';
 
 class LeftoverService {
   async writeAll(leftovers: Leftovers) {
