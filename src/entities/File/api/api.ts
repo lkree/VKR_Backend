@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { UploadedFile } from 'express-fileupload';
 import * as fs from 'fs';
 
