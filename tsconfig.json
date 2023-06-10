@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "noEmit": true,
+    "noEmitOnError": true,
     "experimentalDecorators": true,
     "composite": true,
     "module": "esnext",
