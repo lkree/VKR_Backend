@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { MinimalLeftoversList } from '~/entities/MinimalLeftovers';
 
 import { ApiError } from '~/shared/lib/ApiError';

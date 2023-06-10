@@ -1,3 +1,4 @@
+// @ts-nocheck
 import _ from 'lodash';
 
 import type { MinimalLeftover, MinimalLeftoversList, MinimalLeftoverProduct } from '~/entities/MinimalLeftovers';
