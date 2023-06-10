@@ -1,21 +1,29 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
-import { RequestAssert } from '~/shared/lib/decorators/index.js';
-import { isObject } from '~/shared/lib/helpers/index.js';
+import { BaseController, Controller } from '~/shared/lib/BaseController';
+import { RequestPropsHandle } from '~/shared/lib/decorators';
 
-import { configService } from '../api/index.js';
+import { configService } from '../api';
+import { emailSettingsValidationObject, transformBDConfigToFE } from '../lib/helpers';
 
 class ConfigController extends BaseController implements Controller<typeof configService> {
-  @RequestAssert({ config: isObject })
-  async write(req: Request, res: Response, __: NextFunction) {
-    const { config } = req.body;
+  @RequestPropsHandle({
+    validate: [{ validationObject: emailSettingsValidationObject }],
+    transform: { out: transformBDConfigToFE },
+  })
+  async writeEmailSettings(req: Request, res: Response, __: NextFunction) {
+    const oldConfig = await configService.getEmailSettings();
 
-    res.json(await configService.write(config));
+    res.json(
+      await configService.writeEmailSettings({
+        emailSettings: { ...oldConfig, ...req.body },
+      })
+    );
   }
 
-  async get(_: Request, res: Response, __: NextFunction) {
-    res.json(await configService.get());
+  @RequestPropsHandle({ transform: { out: transformBDConfigToFE } })
+  async getEmailSettings(_: Request, res: Response, __: NextFunction) {
+    res.json(await configService.getEmailSettings());
   }
 }
 

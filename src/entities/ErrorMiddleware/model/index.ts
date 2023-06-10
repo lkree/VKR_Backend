@@ -1,1 +1,1 @@
-export * from './errorMiddleware.js';
+export * from './errorMiddleware';

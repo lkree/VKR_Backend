@@ -1,1 +1,1 @@
-export { HTMLParser } from './model/index.js';
+export { HTMLParser } from './model';

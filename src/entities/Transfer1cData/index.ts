@@ -1,1 +1,1 @@
-export { Transfer1cData } from './model/index.js';
+export { Transfer1cData } from './model';

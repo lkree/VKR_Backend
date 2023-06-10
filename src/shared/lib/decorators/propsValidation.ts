@@ -1,7 +1,7 @@
-import { ApiError } from '~/shared/lib/ApiError/index.js';
-import { isObject } from '~/shared/lib/helpers/index.js';
+import { ApiError } from '~/shared/lib/ApiError';
+import { isObject } from '~/shared/lib/helpers';
 
-import { FULL_VALUE } from './const.js';
+import { FULL_VALUE } from './const';
 
 export type ValidationObject = Record<string, (d: any) => boolean>;
 

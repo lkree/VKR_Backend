@@ -1,57 +1,93 @@
-import { ApiError } from '~/shared/lib/ApiError/index.js';
-import { isObject } from '~/shared/lib/helpers/index.js';
+import _ from 'lodash';
 
-import type { FileLeftovers, Leftover, ViewLeftover } from '../../types/index.js';
+import type { MinimalLeftover, MinimalLeftoversList, MinimalLeftoverProduct } from '~/entities/MinimalLeftovers';
 
-import { assertLeftover, assertLeftovers } from './typeGuards.js';
+import { leftoversSort } from '~/shared/lib/helpers';
+import type { Voidable } from '~/shared/lib/ts';
 
-export const getData = (body: unknown, field: string) => {
-  if (isObject(body) && field in body) return body[field];
+import { BASE_ORDERED_COUNT, MINIMAL_LEFTOVER_AT_END } from '../../const';
+import type {
+  FileLeftoversList,
+  Leftover,
+  LeftoversList,
+  FileLeftoverFilling,
+  LeftoverFE,
+  LeftoversFEList,
+} from '../../types';
 
-  throw ApiError.BadRequest('Не переданы остатки');
-};
+export const computeHaveToOrderField = (MLProduct: Voidable<MinimalLeftoverProduct>, leftoverAtEnd: number) =>
+  (!MLProduct?.minimalLeftover
+    ? BASE_ORDERED_COUNT
+    : MLProduct.minimalLeftover >= leftoverAtEnd
+    ? MLProduct?.orderingCount
+    : BASE_ORDERED_COUNT) ?? BASE_ORDERED_COUNT;
 
-export const getLeftover = (body: unknown) => {
-  const leftover = getData(body, 'leftover');
-
-  assertLeftover(leftover);
-
-  return viewModelIntoDB(leftover);
-};
-
-export const getLeftovers = (body: unknown) => {
-  const leftovers = getData(body, 'leftovers');
-
-  assertLeftovers(leftovers);
-
-  return leftovers.map(viewModelIntoDB);
-};
-
-export const viewModelIntoDB = (model: ViewLeftover): Leftover => ({
-  cityName: model.cityName,
-  leftovers: model.leftovers.map(l => ({
+export const fileModelIntoDB = (cityName: string, model: Array<FileLeftoverFilling>): Leftover => ({
+  cityName,
+  leftovers: model.map(l => ({
     nomenclature: l.Номенклатура,
     unit: l['Ед. изм.'],
+    leftoverAtEnd: l['Конечный остаток'] ?? MINIMAL_LEFTOVER_AT_END,
     ...(l['Начальный остаток'] && { leftoverAtStart: l['Начальный остаток'] }),
-    ...(l['Конечный остаток'] && { leftoverAtEnd: l['Конечный остаток'] }),
     ...(l['Артикул'] && { vendorCode: l['Артикул'] }),
     ...(l['Приход'] && { incoming: l['Приход'] }),
     ...(l['Расход'] && { consumption: l['Расход'] }),
   })),
 });
 
-export const dbModelIntoView = (model: Leftover): ViewLeftover => ({
-  cityName: model.cityName,
-  leftovers: model.leftovers.map(l => ({
-    Номенклатура: l.nomenclature,
-    'Ед. изм.': l.unit,
-    ...(l.leftoverAtStart && { 'Начальный остаток': l.leftoverAtStart }),
-    ...(l.leftoverAtEnd && { 'Конечный остаток': l.leftoverAtEnd }),
-    ...(l.vendorCode && { Артикул: l.vendorCode }),
-    ...(l.incoming && { Приход: l.incoming }),
-    ...(l.consumption && { Расход: l.consumption }),
+export const transformBELeftoverIntoFE = ([{ cityName, leftovers }, minimalLeftover]: [
+  Leftover,
+  Voidable<MinimalLeftover>
+]): LeftoverFE => ({
+  cityName,
+  leftovers: leftovers.map(l => ({
+    nomenclature: l.nomenclature,
+    unit: l.unit,
+    orderedCount: l.orderedCount ?? BASE_ORDERED_COUNT,
+    leftoverAtEnd: l.leftoverAtEnd,
+    haveToOrder: computeHaveToOrderField(
+      minimalLeftover?.products.find(it => it.nomenclature === l.nomenclature),
+      l.leftoverAtEnd
+    ),
   })),
 });
 
-export const fileLeftoversToDB = (leftovers: FileLeftovers) =>
-  Object.entries(leftovers).map(([key, value]) => viewModelIntoDB({ cityName: key, leftovers: value }));
+export const fileLeftoversToDB = (leftovers: FileLeftoversList) =>
+  Object.entries(leftovers).map(([key, value]) => fileModelIntoDB(key, value));
+
+export const transformBELeftoversListIntoFE = ([leftoversList, minimalLeftoversList]: [
+  LeftoversList,
+  MinimalLeftoversList
+]): LeftoversFEList =>
+  leftoversSort(
+    leftoversList.map(leftover =>
+      transformBELeftoverIntoFE([leftover, minimalLeftoversList.find(mll => mll.cityName === leftover.cityName)])
+    )
+  );
+
+export const transformFELeftoverIntoBE = ({ leftovers, cityName }: LeftoverFE): Leftover => ({
+  cityName,
+  leftovers: leftovers.map(l => ({
+    nomenclature: l.nomenclature,
+    unit: l.unit,
+    orderedCount: l.orderedCount ?? BASE_ORDERED_COUNT,
+    leftoverAtEnd: l.leftoverAtEnd,
+  })),
+});
+
+export const transformFELeftoversListIntoBE = (leftoversFEList: LeftoversFEList): LeftoversList =>
+  leftoversFEList.map(transformFELeftoverIntoBE);
+
+export const assignLeftovers = (previous: Leftover, next: Leftover): Leftover => ({
+  cityName: previous.cityName,
+  leftovers: next.leftovers.reduce((r, nextOne, i) => {
+    const existingOne = r.find(it => it.nomenclature === nextOne.nomenclature);
+
+    if (existingOne) {
+      existingOne.leftoverAtEnd = nextOne.leftoverAtEnd;
+      r[i] = _.extend(existingOne, nextOne);
+    }
+
+    return r;
+  }, previous.leftovers),
+});

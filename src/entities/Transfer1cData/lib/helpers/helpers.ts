@@ -1,9 +1,9 @@
 import lodash from 'lodash';
 
-import { isString } from '~/shared/lib/helpers/index.js';
-import type { Nullable } from '~/shared/lib/ts/index.js';
+import { isString } from '~/shared/lib/helpers';
+import type { Nullable } from '~/shared/lib/ts';
 
-import type { CitiesKeys } from '../../types/index.js';
+import type { CitiesKeys } from '../../types';
 
 export const computeCityKey = (productName: string): Nullable<CitiesKeys | string> => {
   const indexCityStarts = productName.lastIndexOf('(');

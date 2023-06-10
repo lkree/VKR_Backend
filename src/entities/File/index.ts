@@ -1,3 +1,3 @@
-export { fileService } from './api/index.js';
-export { fileController } from './controller/index.js';
-export { router as fileRouter } from './router/index.js';
+export { fileService } from './api';
+export { fileController } from './controller';
+export { router as fileRouter } from './router';

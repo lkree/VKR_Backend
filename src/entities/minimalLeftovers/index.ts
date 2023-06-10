@@ -1,3 +1,4 @@
-export { router as minimalLeftoversRouter } from './router/index.js';
-export { minimalLeftoversController } from './controller/index.js';
-export { minimalLeftoversService } from './api/index.js';
+export { router as minimalLeftoversRouter } from './router';
+export { minimalLeftoversController } from './controller';
+export { minimalLeftoversService } from './api';
+export type { MinimalLeftover, MinimalLeftoversList, MinimalLeftoverProduct } from './types';

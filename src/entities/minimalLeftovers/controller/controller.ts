@@ -1,55 +1,77 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import type { Leftovers } from '~/entities/Leftovers/index.js';
+import type { LeftoversList } from '~/entities/Leftovers';
+import { leftoverService } from '~/entities/Leftovers';
 
-import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
-import { RequestAssert, RequestPropsValidation } from '~/shared/lib/decorators/index.js';
-import { isArray } from '~/shared/lib/helpers/index.js';
+import { BaseController, Controller } from '~/shared/lib/BaseController';
+import { RequestPropsHandle } from '~/shared/lib/decorators';
+import { isArray } from '~/shared/lib/helpers';
 
-import { minimalLeftoversService } from '../api/index.js';
+import { minimalLeftoversService } from '../api';
 import {
   assignMinimalLeftovers,
   leftoversIntoMinimalLeftovers,
   minimalLeftoversArrayAssertObject,
   minimalLeftoversValidationObject,
-} from '../lib/helpers/index.js';
-import type { MinimalLeftovers } from '../types/index.js';
+  transformMinimalLeftoversDBIntoFE,
+  transformMinimalLeftoversArrayDBIntoFE,
+} from '../lib/helpers';
+import type { MinimalLeftover } from '../types';
 
 class MinimalLeftoversController extends BaseController implements Controller<typeof minimalLeftoversService> {
-  @RequestPropsValidation({ minimalLeftoversArray: isArray })
-  @RequestAssert(minimalLeftoversArrayAssertObject)
+  @RequestPropsHandle({
+    validate: [{ validationObject: { minimalLeftoversArray: isArray } }],
+    assert: [{ assertObject: minimalLeftoversArrayAssertObject }],
+    transform: { out: transformMinimalLeftoversArrayDBIntoFE },
+  })
   async writeAll(req: Request, res: Response, __: NextFunction) {
     const { minimalLeftoversArray } = req.body;
 
     res.json(await minimalLeftoversService.writeAll(minimalLeftoversArray));
   }
 
-  @RequestPropsValidation(minimalLeftoversValidationObject)
+  @RequestPropsHandle({
+    validate: [{ validationObject: minimalLeftoversValidationObject }],
+    transform: {
+      out: d => (d ? transformMinimalLeftoversDBIntoFE(d) : d),
+    },
+  })
   async write(req: Request, res: Response, __: NextFunction) {
-    const { minimalLeftovers } = req.body as { minimalLeftovers: MinimalLeftovers };
+    const { minimalLeftover } = req.body as { minimalLeftover: MinimalLeftover };
 
-    if (minimalLeftovers.products.length === 0) res.json(await minimalLeftoversService.delete(minimalLeftovers));
-    else res.json(await minimalLeftoversService.write(minimalLeftovers));
+    if (minimalLeftover.products.length === 0) {
+      await leftoverService.deleteOne(minimalLeftover);
+      await this.delete(req, res, __);
+    } else {
+      // await leftoverService._updateFromMinimalLeftover(minimalLeftover);
+      res.json(await minimalLeftoversService.write(minimalLeftover));
+    }
   }
 
-  @RequestPropsValidation(minimalLeftoversValidationObject)
+  @RequestPropsHandle({ validate: [{ validationObject: minimalLeftoversValidationObject }] })
   async delete(req: Request, res: Response, __: NextFunction) {
-    const { minimalLeftovers } = req.body;
+    const { minimalLeftover } = req.body as { minimalLeftover: MinimalLeftover };
 
-    res.json(await minimalLeftoversService.delete(minimalLeftovers));
+    await leftoverService.deleteOne({ cityName: minimalLeftover.cityName });
+
+    res.json(await minimalLeftoversService.delete(minimalLeftover));
   }
 
   async deleteAll(_: Request, res: Response, __: NextFunction) {
     res.json(await minimalLeftoversService.deleteAll());
   }
 
+  @RequestPropsHandle({ transform: { out: transformMinimalLeftoversArrayDBIntoFE } })
   async getAll(_: Request, res: Response, __: NextFunction) {
     res.json(await minimalLeftoversService.getAll());
   }
 
-  async _updateAll(leftovers: Leftovers) {
+  async _updateAll(leftovers: LeftoversList) {
     return minimalLeftoversService.writeAll(
-      assignMinimalLeftovers(await minimalLeftoversService.getAll(), leftoversIntoMinimalLeftovers(leftovers))
+      assignMinimalLeftovers(
+        transformMinimalLeftoversArrayDBIntoFE(await minimalLeftoversService.getAll()),
+        leftoversIntoMinimalLeftovers(leftovers)
+      )
     );
   }
 }

@@ -1,3 +1,3 @@
-export { router as minimalLeftoversRouter } from './router';
-export { minimalLeftoversController } from './controller';
-export { minimalLeftoversService } from './api';
+export { router as responsiblePersonsRouter } from './router';
+export { responsiblePersonsController } from './controller';
+export { responsiblePersonsService } from './api';

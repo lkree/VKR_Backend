@@ -1,10 +1,10 @@
 import type { RequestHandler } from 'express-serve-static-core';
 
-import { tokenService } from '~/entities/Token/index.js';
+import { tokenService } from '~/entities/Token';
 
-import { AccessLevel } from '~/shared/const/index.js';
-import { ApiError } from '~/shared/lib/ApiError/index.js';
-import { isObject } from '~/shared/lib/helpers/index.js';
+import { AccessLevel } from '~/shared/const';
+import { ApiError } from '~/shared/lib/ApiError';
+import { isObject } from '~/shared/lib/helpers';
 
 export const checkAdminMiddleware: RequestHandler = (req, _, next) => {
   try {

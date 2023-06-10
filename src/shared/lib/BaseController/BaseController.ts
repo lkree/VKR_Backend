@@ -1,6 +1,6 @@
 import type { RequestParamHandler } from 'express-serve-static-core';
 
-import type { ValidateMethodName } from '~/shared/lib/ts/index.js';
+import type { ValidateMethodName } from '~/shared/lib/ts';
 
 const handler = {
   get: <T extends Record<string, (...props: Array<any>) => any>>(target: T, prop: keyof T) =>

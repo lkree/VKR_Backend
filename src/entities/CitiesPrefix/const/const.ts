@@ -1,7 +1,7 @@
-import { computePathWithDomain } from '~/shared/api/index.js';
-import { MethodsMap } from '~/shared/lib/ts/index.js';
+import { computePathWithDomain } from '~/shared/api';
+import { MethodsMap } from '~/shared/lib/ts';
 
-import { citiesPrefixController } from '../controller/index.js';
+import { citiesPrefixController } from '../controller';
 
 const computePath = computePathWithDomain('citiesPrefix');
 

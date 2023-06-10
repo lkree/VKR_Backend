@@ -1,2 +1,3 @@
-export { tokenModel } from './model/index.js';
-export { tokenService } from './api/index.js';
+export { tokenModel } from './model';
+export { tokenService } from './api';
+export type { Tokens } from './types';

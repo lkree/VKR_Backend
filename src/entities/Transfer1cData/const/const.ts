@@ -14,5 +14,4 @@
 //   Общее: 'Общее',
 // } as const;
 
-export const CITY_ROW_NAME = 'Номенклатура';
-export const SHARED_KEY = 'Общее';
+export const NOMENCLATURE_FIELD_NAME = 'Номенклатура';

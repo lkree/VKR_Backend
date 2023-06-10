@@ -1,2 +1,2 @@
-export * from './types.js';
-export * from './loadConfig.js';
+export * from './types';
+export * from './loadConfig';

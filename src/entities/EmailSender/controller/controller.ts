@@ -1,24 +1,36 @@
 import type { NextFunction, Request, Response } from 'express';
 
+import type { LeftoversOverdraftList } from '~/entities/Leftovers/types';
+
 import { BaseController, Controller } from '~/shared/lib/BaseController';
+import { RequestPropsHandle } from '~/shared/lib/decorators';
+import { checkEmailValidity } from '~/shared/lib/helpers';
+import { Nullable } from '~/shared/lib/ts';
 
-import { configService } from '../api';
+import { emailSenderService } from '../api';
 
-class ConfigController extends BaseController implements Controller<typeof configService> {
-  async writeEmailSettings(req: Request, res: Response, __: NextFunction) {
-    const { password, port, secure, user, host } = req.body;
-    const oldConfig = await configService.getEmailSettings();
+class EmailSenderController extends BaseController implements Controller<typeof emailSenderService> {
+  @RequestPropsHandle({ validate: [{ validationObject: { email: checkEmailValidity } }] })
+  async sendTestEmail(req: Request, res: Response, __: NextFunction) {
+    const { email } = req.body;
 
-    res.json(
-      await configService.writeEmailSettings({
-        emailSettings: { ...oldConfig, password, port, secure, user, host },
-      })
-    );
+    res.json(await emailSenderService.sendTestEmail(email));
   }
 
-  async getEmailSettings(_: Request, res: Response, __: NextFunction) {
-    res.json(await configService.getEmailSettings());
+  async _sendOverdraftEmails(
+    leftoversOverdraftList: LeftoversOverdraftList,
+    emailList: Array<{ cityName: string; email: Nullable<string> }>
+  ) {
+    if (leftoversOverdraftList.length) {
+      await Promise.all(
+        leftoversOverdraftList.map(overdraft => {
+          const email = emailList.find(it => it.cityName === overdraft.cityName)?.email;
+
+          return email ? emailSenderService._sendLeftoverOverdraftEmail(overdraft, email) : null;
+        })
+      );
+    }
   }
 }
 
-export const configController = new ConfigController();
+export const emailSenderController = new EmailSenderController();

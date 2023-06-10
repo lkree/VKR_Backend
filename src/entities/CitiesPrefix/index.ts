@@ -1,4 +1,4 @@
-export { citiesPrefixService } from './api/index.js';
-export { citiesPrefixModel } from './model/index.js';
-export { citiesPrefixController } from './controller/index.js';
-export { router as citiesPrefixRouter } from './router/index.js';
+export { citiesPrefixService } from './api';
+export { citiesPrefixModel } from './model';
+export { citiesPrefixController } from './controller';
+export { router as citiesPrefixRouter } from './router';

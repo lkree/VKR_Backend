@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { authMiddleware } from '~/entities/AuthMiddleware/index.js';
+import { authMiddleware } from '~/entities/AuthMiddleware';
 
-import { Methods } from '../const/index.js';
-import { citiesPrefixController } from '../controller/index.js';
+import { Methods } from '../const';
+import { citiesPrefixController } from '../controller';
 
 const router = Router();
 

@@ -1,4 +1,23 @@
-interface viewLeftoverFilling {
+import { GetMongooseScheme } from '~/shared/lib/ts';
+
+import type { leftoversModel } from '../model';
+
+export type LeftoversList = Array<GetMongooseScheme<typeof leftoversModel>>;
+
+export type Leftover = LeftoversList[number];
+
+export type LeftoverFE = {
+  cityName: Leftover['cityName'];
+  leftovers: Array<
+    Pick<Leftover['leftovers'][number], 'nomenclature' | 'leftoverAtEnd' | 'orderedCount' | 'unit'> & {
+      haveToOrder: number;
+    }
+  >;
+};
+
+export type LeftoversFEList = Array<LeftoverFE>;
+
+export interface FileLeftoverFilling {
   Номенклатура: string;
   'Ед. изм.': string;
   Артикул?: string;
@@ -8,26 +27,17 @@ interface viewLeftoverFilling {
   'Конечный остаток'?: number;
 }
 
-export interface Leftover {
+export interface FileLeftoversList {
+  [cityName: string]: Array<FileLeftoverFilling>;
+}
+
+export type Overdraft = Pick<LeftoverFE['leftovers'][number], 'nomenclature' | 'haveToOrder' | 'unit'>;
+
+export type OverdraftList = Array<Overdraft>;
+
+export interface LeftoversOverdraft {
   cityName: string;
-  leftovers: Array<{
-    nomenclature: string;
-    unit: string;
-    vendorCode?: string;
-    incoming?: number;
-    consumption?: number;
-    leftoverAtStart?: number;
-    leftoverAtEnd?: number;
-  }>;
+  overdraftList: OverdraftList;
 }
 
-export type Leftovers = Array<Leftover>;
-
-export interface ViewLeftover {
-  cityName: string;
-  leftovers: Array<viewLeftoverFilling>;
-}
-
-export interface FileLeftovers {
-  [cityName: string]: Array<viewLeftoverFilling>;
-}
+export type LeftoversOverdraftList = Array<LeftoversOverdraft>;

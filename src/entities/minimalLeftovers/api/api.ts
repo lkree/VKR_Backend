@@ -1,38 +1,29 @@
-import { ApiError } from '~/shared/lib/ApiError/index.js';
+import { ApiError } from '~/shared/lib/ApiError';
 
-import { NON_PRODUCT_LEFTOVER } from '../const/index.js';
-import { minimalLeftoversModel } from '../model/index.js';
-import type { MinimalLeftovers, MinimalLeftoversArray } from '../types/index.js';
-
-const transformMinimalLeftoversDBIntoView = (minimalLeftovers: MinimalLeftovers) => ({
-  cityName: minimalLeftovers.cityName,
-  products: minimalLeftovers.products.map(product => ({
-    name: product.name,
-    minimalLeftover: product.minimalLeftover === NON_PRODUCT_LEFTOVER ? 0 : product.minimalLeftover,
-    orderingCount: product.orderingCount === NON_PRODUCT_LEFTOVER ? 0 : product.orderingCount,
-  })),
-});
+import { transformMinimalLeftoversArrayDBIntoFE, transformMinimalLeftoversDBIntoFE } from '../lib/helpers';
+import { minimalLeftoversModel } from '../model';
+import type { MinimalLeftover, MinimalLeftoversList } from '../types';
 
 class MinimalLeftoversService {
-  async writeAll(minimalLeftoversArray: MinimalLeftoversArray) {
+  async writeAll(minimalLeftoversArray: MinimalLeftoversList) {
     await this.deleteAll();
     await minimalLeftoversModel.create(minimalLeftoversArray);
 
     return this.getAll();
   }
 
-  async write(minimalLeftovers: MinimalLeftovers) {
-    await minimalLeftoversModel.updateOne({ cityName: minimalLeftovers.cityName }, minimalLeftovers);
+  async write(minimalLeftover: MinimalLeftover) {
+    await minimalLeftoversModel.updateOne({ cityName: minimalLeftover.cityName }, minimalLeftover);
 
-    const newItem = await minimalLeftoversModel.findOne({ cityName: minimalLeftovers.cityName });
+    const newItem = await minimalLeftoversModel.findOne({ cityName: minimalLeftover.cityName });
 
-    if (newItem) return transformMinimalLeftoversDBIntoView(newItem);
+    if (newItem) return newItem;
 
     throw ApiError.ServerError('что-то пошло не так во время обновления записи');
   }
 
-  async delete(minimalLeftovers: MinimalLeftovers) {
-    await minimalLeftoversModel.deleteOne({ cityName: minimalLeftovers.cityName });
+  async delete(minimalLeftover: MinimalLeftover) {
+    await minimalLeftoversModel.deleteOne({ cityName: minimalLeftover.cityName });
 
     return null;
   }
@@ -44,7 +35,17 @@ class MinimalLeftoversService {
   }
 
   getAll() {
-    return minimalLeftoversModel.find().then(d => d.map(transformMinimalLeftoversDBIntoView));
+    return minimalLeftoversModel.find();
+  }
+
+  async _get(minimalLeftover: Pick<MinimalLeftover, 'cityName'>) {
+    const model = await minimalLeftoversModel.findOne(minimalLeftover);
+
+    return model ? transformMinimalLeftoversDBIntoFE(model) : null;
+  }
+
+  async _getAll() {
+    return transformMinimalLeftoversArrayDBIntoFE(await minimalLeftoversModel.find());
   }
 }
 

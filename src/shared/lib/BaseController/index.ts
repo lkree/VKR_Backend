@@ -1,1 +1,1 @@
-export * from './BaseController.js';
+export * from './BaseController';

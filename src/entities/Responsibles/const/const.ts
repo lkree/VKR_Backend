@@ -1,16 +1,11 @@
 import { computePathWithDomain } from '~/shared/api';
 import type { MethodsMap } from '~/shared/lib/ts';
 
-import { minimalLeftoversController } from '../controller';
+import { responsiblePersonsController } from '../controller';
 
-const computePath = computePathWithDomain('minimalLeftovers');
+const computePath = computePathWithDomain('responsiblePersons');
 
-export const Methods: MethodsMap<typeof minimalLeftoversController> = {
+export const Methods: MethodsMap<typeof responsiblePersonsController> = {
   GetAll: computePath('getAll'),
-  WriteAll: computePath('writeAll'),
   Write: computePath('write'),
-  DeleteAll: computePath('deleteAll'),
-  Delete: computePath('delete'),
 };
-
-export const NON_PRODUCT_LEFTOVER = null;

@@ -1,1 +1,1 @@
-export * from './Transfer1cData.js';
+export * from './Transfer1cData';

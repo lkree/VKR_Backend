@@ -1,26 +1,29 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { BaseController, Controller } from '~/shared/lib/BaseController/index.js';
-import { RequestPropsValidation } from '~/shared/lib/decorators/index.js';
+import { BaseController, Controller } from '~/shared/lib/BaseController';
+import { RequestPropsHandle } from '~/shared/lib/decorators';
 
-import { citiesPrefixService } from '../api/index.js';
-import { cityNamePrefixValidationObject, cityPrefixValidationObject } from '../lib/helpers/index.js';
+import { citiesPrefixService } from '../api';
+import { citiesPrefixArrayDBIntoFE, cityNamePrefixValidationObject, cityPrefixValidationObject } from '../lib/helpers';
 
 class CitiesPrefixController extends BaseController implements Controller<typeof citiesPrefixService> {
-  @RequestPropsValidation(cityNamePrefixValidationObject)
+  @RequestPropsHandle({
+    validate: [{ validationObject: cityNamePrefixValidationObject }],
+    transform: { out: citiesPrefixArrayDBIntoFE },
+  })
   async add(req: Request, res: Response, __: NextFunction) {
-    const { cityName, cityPrefix } = req.body;
-
-    res.json(await citiesPrefixService.add(cityName, cityPrefix));
+    res.json(await citiesPrefixService.add(req.body));
   }
 
-  @RequestPropsValidation(cityPrefixValidationObject)
+  @RequestPropsHandle({
+    validate: [{ validationObject: cityPrefixValidationObject }],
+    transform: { out: citiesPrefixArrayDBIntoFE },
+  })
   async delete(req: Request, res: Response, __: NextFunction) {
-    const { cityPrefix } = req.body;
-
-    res.json(await citiesPrefixService.delete(cityPrefix));
+    res.json(await citiesPrefixService.delete(req.body));
   }
 
+  @RequestPropsHandle({ transform: { out: citiesPrefixArrayDBIntoFE } })
   async getAll(_: Request, res: Response, __: NextFunction) {
     res.json(await citiesPrefixService.getAll());
   }

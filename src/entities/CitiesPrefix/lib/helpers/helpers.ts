@@ -1,4 +1,11 @@
-import { isString } from '~/shared/lib/helpers/index.js';
+import { alphabeticalSort, isString } from '~/shared/lib/helpers';
 
-export const cityPrefixValidationObject = { cityPrefix: isString };
-export const cityNamePrefixValidationObject = { cityName: isString, ...cityPrefixValidationObject };
+import type { CitiesPrefix } from '../../types';
+
+export const cityPrefixValidationObject = { prefix: isString };
+export const cityNamePrefixValidationObject = { name: isString, ...cityPrefixValidationObject };
+
+export const citiesPrefixDBIntoFE = ({ name, prefix }: CitiesPrefix): [string, string] => [name, prefix];
+
+export const citiesPrefixArrayDBIntoFE = (d: Array<CitiesPrefix>) =>
+  d.map(citiesPrefixDBIntoFE).sort((a, b) => alphabeticalSort(a[0], b[0]));

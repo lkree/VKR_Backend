@@ -1,10 +1,14 @@
-import { computeCityKey, computeProductName } from '~/entities/Transfer1cData/lib/helpers/index.js';
+import _ from 'lodash';
 
-import { isArray, isEqual, isString } from '~/shared/lib/helpers/index.js';
+import { SHARED_KEY } from '~/shared/const';
+import { isArray, isString } from '~/shared/lib/helpers';
 
-import { CITY_ROW_NAME, SHARED_KEY } from '../const/index.js';
-import { isCityKey } from '../lib/helpers/typeGuards.js';
-import type { Cities, CitiesSettings } from '../types/index.js';
+import { NOMENCLATURE_FIELD_NAME } from '../const';
+import { computeCityKey, computeProductName, isCityKey } from '../lib/helpers';
+import type { Cities, CitiesSettings } from '../types';
+
+const isProductsEqual = (a: Record<string, string>, b: Record<string, string>) =>
+  a[NOMENCLATURE_FIELD_NAME] === b[NOMENCLATURE_FIELD_NAME];
 
 export const Transfer1cData = <T extends CitiesSettings>(
   data: Array<Record<string, string | number>>,
@@ -15,39 +19,41 @@ export const Transfer1cData = <T extends CitiesSettings>(
   return Object.entries(
     data.reduce(
       (result, oneLineData) => {
-        const productNameWithCity = oneLineData[CITY_ROW_NAME];
+        const productNameWithCity = oneLineData[NOMENCLATURE_FIELD_NAME];
 
         if (!productNameWithCity || !isString(productNameWithCity)) return result;
 
-        const cityKey = computeCityKey(productNameWithCity);
-        const productName = computeProductName(productNameWithCity, cityKey);
-        const resultData = { ...oneLineData, [CITY_ROW_NAME]: productName };
+        const key = computeCityKey(productNameWithCity);
+        const productName = computeProductName(productNameWithCity, key);
+        const resultData = {
+          ...oneLineData,
+          [NOMENCLATURE_FIELD_NAME]: _.capitalize(productName.trim().toLowerCase()),
+        };
+        const cityKey = isCityKey(key, citiesSettings) ? citiesSettings[key] : null;
+        const findHelper = isProductsEqual.bind(null, resultData);
 
-        if (cityKey && isCityKey(cityKey, citiesSettings)) {
-          if (!(citiesSettings[cityKey]! in result)) result[citiesSettings[cityKey]!] = [];
-
-          if (!result[citiesSettings[cityKey]!]!.find(it => isEqual(it, resultData))) {
-            result[citiesSettings[cityKey]!]!.push(resultData);
+        if (cityKey) {
+          if (!result[cityKey]?.find(findHelper)) {
+            result[cityKey]?.push(resultData);
           }
-        } else {
-          if (!result[SHARED_KEY]) result[SHARED_KEY] = [];
-
-          if (!result[SHARED_KEY].find(it => it[CITY_ROW_NAME] === resultData[CITY_ROW_NAME])) {
-            result[SHARED_KEY].push(resultData);
-          }
+        } else if (!result[SHARED_KEY]!.find(findHelper)) {
+          result[SHARED_KEY]!.push(resultData);
         }
 
         return result;
       },
-      Object.values(citiesSettings).reduce((r, v) => {
-        r[v] = [];
+      Object.values(citiesSettings).reduce(
+        (r, v) => {
+          r[v] = [];
 
-        return r;
-      }, {} as Record<Cities | string, Array<Record<string, string>>>)
+          return r;
+        },
+        { [SHARED_KEY]: [] } as Record<Cities | string, Array<Record<string, string>>>
+      )
     )
-  ).reduce((r, [key, value]) => ({ ...r, ...(value.length && { [key]: value }) }), {});
-};
+  ).reduce((r, [key, value]) => {
+    if (value.length) r[key] = value;
 
-// export const Transfer1cData = () => {
-//   return void 0;
-// };
+    return r;
+  }, {} as Record<Cities | string, Array<Record<string, string>>>);
+};

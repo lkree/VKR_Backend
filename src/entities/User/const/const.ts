@@ -1,8 +1,8 @@
-import { computePathWithDomain } from '~/shared/api/index.js';
-import { AccessLevel } from '~/shared/const/index.js';
-import type { MethodsMap } from '~/shared/lib/ts/index.js';
+import { computePathWithDomain } from '~/shared/api';
+import { AccessLevel } from '~/shared/const';
+import type { MethodsMap } from '~/shared/lib/ts';
 
-import type { userController } from '../controller/index.js';
+import type { userController } from '../controller';
 
 const computePath = computePathWithDomain('user');
 
@@ -13,6 +13,7 @@ export const Methods: MethodsMap<typeof userController> = {
   Logout: computePath('logout'),
   Refresh: computePath('refresh'),
   Update: computePath('update'),
+  Delete: computePath('delete'),
   GetAll: computePath('GetAll'),
 };
 

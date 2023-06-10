@@ -1,1 +1,1 @@
-export * from './subscribesController.js';
+export * from './subscribesController';

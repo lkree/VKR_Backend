@@ -1,11 +1,10 @@
 import { computePathWithDomain } from '~/shared/api';
 import type { MethodsMap } from '~/shared/lib/ts';
 
-import { configController } from '../controller';
+import { emailSenderController } from '../controller';
 
-const computePath = computePathWithDomain('config');
+const computePath = computePathWithDomain('emailSender');
 
-export const Methods: MethodsMap<typeof configController> = {
-  GetEmailSettings: computePath('getEmailSettings'),
-  WriteEmailSettings: computePath('writeEmailSettings'),
+export const Methods: MethodsMap<typeof emailSenderController> = {
+  SendTestEmail: computePath('sendTestEmail'),
 };

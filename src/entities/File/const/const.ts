@@ -1,8 +1,8 @@
-import { computePathWithDomain } from '~/shared/api/index.js';
-import { computeDirName } from '~/shared/lib/helpers/index.js';
-import type { MethodsMap } from '~/shared/lib/ts/index.js';
+import { computePathWithDomain } from '~/shared/api';
+import { computeDirName } from '~/shared/lib/helpers';
+import type { MethodsMap } from '~/shared/lib/ts';
 
-import { fileController } from '../controller/index.js';
+import { fileController } from '../controller';
 
 export const FILE_DIRECTORY = computeDirName('/assets/1c/');
 export const FILE_DEFAULT_NAME = '/leftovers.html';

@@ -1,1 +1,1 @@
-export { apiRouter } from './apiRouter.js';
+export { apiRouter } from './apiRouter';

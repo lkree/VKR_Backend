@@ -1,1 +1,1 @@
-export { checkAdminMiddleware } from './model/index.js';
+export { checkAdminMiddleware } from './model';

@@ -1,2 +1,2 @@
-export * from './call.js';
-export * from './helpers.js';
+export * from './call';
+export * from './helpers';

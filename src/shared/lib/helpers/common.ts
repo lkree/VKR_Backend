@@ -3,9 +3,10 @@ import * as fs from 'fs';
 import lodash from 'lodash';
 import path from 'path';
 
-import { NUMBER_SEPARATOR } from '~/shared/const/index.js';
+import { NUMBER_SEPARATOR } from '~/shared/const';
 
-import { isPrimitive, isObject, isArray, isString, isNumber } from './typeGuards.js';
+import { EMAIL_REGEX } from './const';
+import { isPrimitive, isObject, isArray, isString, isNumber } from './typeGuards';
 
 type Value<T> = T extends boolean | number | string
   ? T
@@ -96,3 +97,15 @@ export const toSnakeCase = <T extends Record<string, any>>(data: T): T => forEac
 export const toCamelCase = <T extends Record<string, any>>(data: T): T => forEachKey(data, lodash.camelCase) as T;
 
 export const isEqual = <T, K>(a: T, b: K) => JSON.parse(JSON.stringify(a)) === JSON.parse(JSON.stringify(b));
+
+export const checkEmailValidity = (email: string) => EMAIL_REGEX.test(email);
+
+export const alphabeticalSort = (a: string, b: string) => {
+  const aName = a.toLowerCase();
+  const bName = b.toLowerCase();
+
+  if (aName < bName) return -1;
+  if (aName > bName) return 1;
+
+  return 0;
+};

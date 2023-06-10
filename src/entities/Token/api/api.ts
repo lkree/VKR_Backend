@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import type { DeleteResult } from 'mongodb';
 import type { Types } from 'mongoose';
 
-import { tokenModel } from '../model/index.js';
+import { tokenModel } from '../model';
 
 class TokenService {
   generateTokens(payload: Parameters<(typeof jwt)['sign']>[0]) {

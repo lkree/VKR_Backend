@@ -1,57 +1,31 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import type { Leftovers } from '~/entities/Leftovers';
-
 import { BaseController, Controller } from '~/shared/lib/BaseController';
-import { RequestAssert, RequestPropsValidation } from '~/shared/lib/decorators';
-import { isArray } from '~/shared/lib/helpers';
+import { RequestPropsHandle } from '~/shared/lib/decorators';
+import { isObject } from '~/shared/lib/helpers';
 
-import { minimalLeftoversService } from '../api';
-import {
-  assignMinimalLeftovers,
-  leftoversIntoMinimalLeftovers,
-  minimalLeftoversArrayAssertObject,
-  minimalLeftoversValidationObject,
-} from '../lib/helpers';
-import type { MinimalLeftovers } from '../types';
+import { responsiblePersonsService } from '../api';
+import { transformDBArrayIntoFE, transformDBIntoFE } from '../lib/helpers';
 
-class MinimalLeftoversController extends BaseController implements Controller<typeof minimalLeftoversService> {
-  @RequestPropsValidation({ minimalLeftoversArray: isArray })
-  @RequestAssert(minimalLeftoversArrayAssertObject)
-  async writeAll(req: Request, res: Response, __: NextFunction) {
-    const { minimalLeftoversArray } = req.body;
-
-    res.json(await minimalLeftoversService.writeAll(minimalLeftoversArray));
-  }
-
-  @RequestPropsValidation(minimalLeftoversValidationObject)
+class ResponsiblePersonsController extends BaseController implements Controller<typeof responsiblePersonsService> {
+  @RequestPropsHandle({
+    validate: [{ validationObject: { responsiblePerson: isObject } }],
+    transform: { out: transformDBIntoFE },
+  })
   async write(req: Request, res: Response, __: NextFunction) {
-    const { minimalLeftovers } = req.body as { minimalLeftovers: MinimalLeftovers };
+    const { responsiblePerson } = req.body;
 
-    if (minimalLeftovers.products.length === 0) res.json(await minimalLeftoversService.delete(minimalLeftovers));
-    else res.json(await minimalLeftoversService.write(minimalLeftovers));
+    res.json(await responsiblePersonsService.write(responsiblePerson));
   }
 
-  @RequestPropsValidation(minimalLeftoversValidationObject)
-  async delete(req: Request, res: Response, __: NextFunction) {
-    const { minimalLeftovers } = req.body;
-
-    res.json(await minimalLeftoversService.delete(minimalLeftovers));
-  }
-
-  async deleteAll(_: Request, res: Response, __: NextFunction) {
-    res.json(await minimalLeftoversService.deleteAll());
-  }
-
+  @RequestPropsHandle({ transform: { out: transformDBArrayIntoFE } })
   async getAll(_: Request, res: Response, __: NextFunction) {
-    res.json(await minimalLeftoversService.getAll());
+    res.json(await responsiblePersonsService.getAll());
   }
 
-  async _updateAll(leftovers: Leftovers) {
-    return minimalLeftoversService.writeAll(
-      assignMinimalLeftovers(await minimalLeftoversService.getAll(), leftoversIntoMinimalLeftovers(leftovers))
-    );
+  _getUsersEmailByCity(cities: Array<string>) {
+    return Promise.all(cities.map(c => responsiblePersonsService._getUserEmailByCity(c)));
   }
 }
 
-export const minimalLeftoversController = new MinimalLeftoversController();
+export const responsiblePersonsController = new ResponsiblePersonsController();

@@ -5,17 +5,17 @@ import express from 'express';
 import fileUpload from 'express-fileupload';
 // import * as fs from 'fs';
 import mongoose from 'mongoose';
-import { createTransport } from 'nodemailer';
+// import { createTransport } from 'nodemailer';
 import * as process from 'process';
-import { apiRouter } from '~/processes/routing/index.js';
+import { apiRouter } from '~/processes/routing';
 
-import { errorMiddleware } from '~/entities/ErrorMiddleware/index.js';
+import { errorMiddleware } from '~/entities/ErrorMiddleware';
 
-// import { HTMLParser } from '~/entities/HTMLParser/index.js';
-// import { Transfer1cData } from '~/entities/Transfer1cData/index.js';
-import { prepareBaseRouting } from '~/shared/lib/helpers/index.js';
+// import { HTMLParser } from '~/entities/HTMLParser';
+// import { Transfer1cData } from '~/entities/Transfer1cData';
+import { prepareBaseRouting } from '~/shared/lib/helpers';
 
-// import { userService } from '~/entities/User/index.js';
+// import { userService } from '~/entities/User';
 
 dotenv.config();
 
@@ -42,34 +42,16 @@ dotenv.config();
 //
 // if (parsedData) console.log(transformObjectWithStringsToNumbers(parsedData));
 
-// const transporter = createTransport({
-//   host: 'smtp.ethereal.email',
-//   port: 587,
-//   auth: {
-//     user: 'melody.dietrich86@ethereal.email',
-//     pass: 'YKeP4RNSY84G3HZDpD',
-//   },
-// });
-
-const transporter = createTransport({
-  host: 'smtp.mail.ru',
-  port: 465,
-  secure: true,
-  auth: {
-    user: 'ownedharad@mail.ru',
-    pass: '1xmg4fpStDspUb7JaVh6',
-  },
-});
-
-void transporter
-  .sendMail({
-    from: '"asd" <ownedharad@mail.ru>', // sender address
-    to: 'xtendmix@gmail.com', // list of receivers
-    subject: 'Hello ✔', // Subject line
-    text: 'Hello world?', // plain text body
-    html: '<b>Hello world?</b>', // html body
-  })
-  .catch(console.log);
+//
+// void transporter
+//   .sendMail({
+//     from: '"asd" <ownedharad@mail.ru>', // sender address
+//     to: 'xtendmix@gmail.com', // list of receivers
+//     subject: 'Hello ✔', // Subject line
+//     text: 'Hello world?', // plain text body
+//     html: '<b>Hello world?</b>', // html body
+//   })
+//   .catch(console.log);
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();

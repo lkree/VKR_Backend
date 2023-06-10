@@ -1,5 +1,6 @@
-import type { GetMongooseScheme } from '~/shared/lib/ts/index.js';
+import type { GetMongooseScheme } from '~/shared/lib/ts';
 
-import type { userModel } from '../model/index.js';
+import type { userModel } from '../model';
 
-export type User = GetMongooseScheme<typeof userModel>;
+export type DBUser = GetMongooseScheme<typeof userModel>;
+export type FEUser = Omit<DBUser, 'password'>;

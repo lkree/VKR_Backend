@@ -1,8 +1,9 @@
-import type { Nullable } from '~/shared/lib/ts';
+import type { responsiblePersonsModel } from '~/entities/Responsibles/model';
 
-export interface MinimalLeftovers {
-  cityName: string;
-  products: Array<{ name: string; minimalLeftover?: Nullable<number>; orderingCount?: Nullable<number> }>;
+import type { GetMongooseScheme } from '~/shared/lib/ts';
+
+export type ResponsiblePerson = GetMongooseScheme<typeof responsiblePersonsModel>;
+
+export interface ResponsiblePersonWithPassword extends ResponsiblePerson {
+  password?: string;
 }
-
-export type MinimalLeftoversArray = Array<MinimalLeftovers>;

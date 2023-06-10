@@ -1,8 +1,9 @@
-import type { Nullable } from '~/shared/lib/ts/index.js';
+import type { GetMongooseScheme } from '~/shared/lib/ts';
 
-export interface MinimalLeftovers {
-  cityName: string;
-  products: Array<{ name: string; minimalLeftover?: Nullable<number>; orderingCount?: Nullable<number> }>;
-}
+import type { minimalLeftoversModel } from '../model';
 
-export type MinimalLeftoversArray = Array<MinimalLeftovers>;
+export type MinimalLeftover = GetMongooseScheme<typeof minimalLeftoversModel>;
+
+export type MinimalLeftoversList = Array<MinimalLeftover>;
+
+export type MinimalLeftoverProduct = MinimalLeftover['products'][number];

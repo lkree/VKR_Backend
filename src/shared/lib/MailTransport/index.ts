@@ -1,1 +1,1 @@
-export * from './MailTransport.js';
+export * from './MailTransport';

@@ -1,7 +1,7 @@
-import { computePathWithDomain } from '~/shared/api/index.js';
-import type { MethodsMap } from '~/shared/lib/ts/index.js';
+import { computePathWithDomain } from '~/shared/api';
+import type { MethodsMap } from '~/shared/lib/ts';
 
-import { minimalLeftoversController } from '../controller/index.js';
+import { minimalLeftoversController } from '../controller';
 
 const computePath = computePathWithDomain('minimalLeftovers');
 
@@ -13,4 +13,4 @@ export const Methods: MethodsMap<typeof minimalLeftoversController> = {
   Delete: computePath('delete'),
 };
 
-export const NON_PRODUCT_LEFTOVER = null;
+export const NON_PRODUCT_LEFTOVER = 0;

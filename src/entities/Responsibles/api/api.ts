@@ -1,51 +1,58 @@
+import { userService } from '~/entities/User';
+
 import { ApiError } from '~/shared/lib/ApiError';
 
-import { NON_PRODUCT_LEFTOVER } from '../const';
-import { minimalLeftoversModel } from '../model';
-import type { MinimalLeftovers, MinimalLeftoversArray } from '../types';
+import { responsiblePersonsModel } from '../model';
+import type { ResponsiblePerson, ResponsiblePersonWithPassword } from '../types';
 
-const transformMinimalLeftoversDBIntoView = (minimalLeftovers: MinimalLeftovers) => ({
-  cityName: minimalLeftovers.cityName,
-  products: minimalLeftovers.products.map(product => ({
-    name: product.name,
-    minimalLeftover: product.minimalLeftover === NON_PRODUCT_LEFTOVER ? 0 : product.minimalLeftover,
-    orderingCount: product.orderingCount === NON_PRODUCT_LEFTOVER ? 0 : product.orderingCount,
-  })),
-});
+class ResponsiblePersonsService {
+  async write(responsiblePerson: ResponsiblePersonWithPassword) {
+    const oldItem = await responsiblePersonsModel.findOne({ cityName: responsiblePerson.cityName });
 
-class MinimalLeftoversService {
-  async writeAll(minimalLeftoversArray: MinimalLeftoversArray) {
-    await this.deleteAll();
-    await minimalLeftoversModel.create(minimalLeftoversArray);
+    if (oldItem) await responsiblePersonsModel.updateOne({ cityName: responsiblePerson.cityName }, responsiblePerson);
+    else await responsiblePersonsModel.create(responsiblePerson);
 
-    return this.getAll();
-  }
+    if (responsiblePerson.password && responsiblePerson.accountEmail) {
+      await Promise.all([
+        oldItem?.accountEmail && oldItem.accountEmail !== responsiblePerson.accountEmail
+          ? userService.delete({ email: oldItem.accountEmail })
+          : void 0,
+        userService
+          ._getUserInfo({ email: responsiblePerson.accountEmail })
+          .then(d => (d ? 'update' : 'registration'))
+          .then(
+            method =>
+              void userService[method]({
+                email: responsiblePerson.accountEmail!,
+                password: responsiblePerson.password!,
+                cityBounding: responsiblePerson.cityName,
+              })
+          ),
+      ]);
+    }
 
-  async write(minimalLeftovers: MinimalLeftovers) {
-    await minimalLeftoversModel.updateOne({ cityName: minimalLeftovers.cityName }, minimalLeftovers);
+    const newItem = await responsiblePersonsModel.findOne({ cityName: responsiblePerson.cityName });
 
-    const newItem = await minimalLeftoversModel.findOne({ cityName: minimalLeftovers.cityName });
-
-    if (newItem) return transformMinimalLeftoversDBIntoView(newItem);
+    if (newItem) return newItem;
 
     throw ApiError.ServerError('что-то пошло не так во время обновления записи');
   }
 
-  async delete(minimalLeftovers: MinimalLeftovers) {
-    await minimalLeftoversModel.deleteOne({ cityName: minimalLeftovers.cityName });
-
-    return null;
-  }
-
-  async deleteAll() {
-    await minimalLeftoversModel.deleteMany();
-
-    return [];
-  }
-
   getAll() {
-    return minimalLeftoversModel.find().then(d => d.map(transformMinimalLeftoversDBIntoView));
+    return responsiblePersonsModel.find();
+  }
+
+  _get(personData: Pick<ResponsiblePerson, 'cityName'>) {
+    return responsiblePersonsModel.findOne(personData);
+  }
+
+  async _delete(personData: Pick<ResponsiblePerson, 'cityName'>) {
+    await responsiblePersonsModel.deleteOne(personData);
+  }
+
+  _getUserEmailByCity(cityName: string) {
+    return responsiblePersonsModel.findOne({ cityName }).then(r => ({ cityName, email: r?.notifyEmail ?? null }));
   }
 }
 
-export const minimalLeftoversService = new MinimalLeftoversService();
+export const responsiblePersonsService = new ResponsiblePersonsService();

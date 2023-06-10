@@ -5,7 +5,11 @@ export const minimalLeftoversModel = model(
   new Schema({
     cityName: { type: String, required: true, unique: true },
     products: [
-      { name: { type: String, required: true }, minimalLeftover: { type: Number }, orderingCount: { type: Number } },
+      {
+        nomenclature: { type: String, required: true },
+        minimalLeftover: { type: Number },
+        orderingCount: { type: Number },
+      },
     ],
   })
 );

@@ -1,8 +1,8 @@
 import type { RequestHandler } from 'express-serve-static-core';
 
-import { tokenService } from '~/entities/Token/index.js';
+import { tokenService } from '~/entities/Token';
 
-import { ApiError } from '~/shared/lib/ApiError/index.js';
+import { ApiError } from '~/shared/lib/ApiError';
 
 export const authMiddleware: RequestHandler = (req, _, next) => {
   try {

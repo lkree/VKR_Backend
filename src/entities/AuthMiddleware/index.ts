@@ -1,1 +1,1 @@
-export { authMiddleware } from './model/index.js';
+export { authMiddleware } from './model';

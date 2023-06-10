@@ -1,2 +1,2 @@
-export * from './helpers.js';
-export * from './typeGuards.js';
+export * from './helpers';
+export * from './typeGuards';

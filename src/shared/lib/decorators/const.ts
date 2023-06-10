@@ -5,3 +5,5 @@ export const enum RequestDataFields {
   Cookies = 'cookies',
   Files = 'files',
 }
+
+export const DEFAULT_FIELD_TO_DATA_EXECUTE = RequestDataFields.Body;

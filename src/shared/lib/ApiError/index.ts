@@ -1,1 +1,1 @@
-export { ApiError } from './model/index.js';
+export { ApiError } from './model';

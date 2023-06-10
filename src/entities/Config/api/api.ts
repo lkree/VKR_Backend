@@ -1,16 +1,32 @@
-import { configModel } from '../model/index.js';
-import { Config } from '../types/index.js';
+import { configModel } from '../model';
+import type { Config } from '../types';
 
 class ConfigService {
-  async write(config: Required<Config>) {
+  async writeEmailSettings(config: Required<Config>) {
     await configModel.deleteMany();
     await configModel.create(config);
 
-    return this.get();
+    return this.getEmailSettings();
   }
 
-  get() {
-    return configModel.find().then(r => r.map(({ emailSettings }) => emailSettings).at(0) ?? {});
+  getEmailSettings() {
+    return configModel.findOne();
+  }
+
+  _getFullEmailSettings() {
+    return configModel.findOne().then(r =>
+      r
+        ? {
+            host: r.emailSettings!.host,
+            port: r.emailSettings!.port,
+            secure: r.emailSettings!.secure,
+            auth: {
+              user: r.emailSettings!.user,
+              pass: r.emailSettings!.password,
+            },
+          }
+        : {}
+    );
   }
 }
 

@@ -1,10 +1,10 @@
 import type { FileArray } from 'express-fileupload';
 
-import { ApiError } from '~/shared/lib/ApiError/index.js';
-import { FULL_VALUE } from '~/shared/lib/decorators/index.js';
-import { isArray, isObject } from '~/shared/lib/helpers/index.js';
+import { ApiError } from '~/shared/lib/ApiError';
+import { FULL_VALUE } from '~/shared/lib/decorators';
+import { isArray, isObject } from '~/shared/lib/helpers';
 
-import { FRONTEND_FILE_NAME } from '../../const/index.js';
+import { FRONTEND_FILE_NAME } from '../../const';
 
 export const fileAssertObject = {
   [FULL_VALUE]: (files: FileArray) => {

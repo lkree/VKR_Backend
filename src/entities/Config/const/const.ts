@@ -1,11 +1,11 @@
-import { computePathWithDomain } from '~/shared/api/index.js';
-import type { MethodsMap } from '~/shared/lib/ts/index.js';
+import { computePathWithDomain } from '~/shared/api';
+import type { MethodsMap } from '~/shared/lib/ts';
 
-import { configController } from '../controller/index.js';
+import { configController } from '../controller';
 
 const computePath = computePathWithDomain('config');
 
 export const Methods: MethodsMap<typeof configController> = {
-  Get: computePath('get'),
-  Write: computePath('write'),
+  GetEmailSettings: computePath('getEmailSettings'),
+  WriteEmailSettings: computePath('writeEmailSettings'),
 };

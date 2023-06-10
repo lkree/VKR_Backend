@@ -1,44 +1,41 @@
 import bcrypt from 'bcrypt';
 
-import { tokenService } from '~/entities/Token/index.js';
-import { User } from '~/entities/User/index.js';
+import { tokenService } from '~/entities/Token';
 
-import { ApiError } from '~/shared/lib/ApiError/index.js';
-import { isObject } from '~/shared/lib/helpers/index.js';
+import { ApiError } from '~/shared/lib/ApiError';
+import { isObject } from '~/shared/lib/helpers';
 
-import { DEFAULT_CREATE_USER_LEVER } from '../const/index.js';
-import { computeUserForFE } from '../lib/helpers/index.js';
-import { userModel } from '../model/index.js';
+import { transformDBUserToTokenData, computeDataForUserCreation } from '../lib/helpers';
+import { userModel } from '../model';
+import type { DBUser } from '../types';
+
+type RegistrationData = Omit<DBUser, 'accessLevel'>;
 
 class UserService {
-  async registration(email: string, password: string) {
+  async registration({ password, email, cityBounding }: RegistrationData) {
     if (await userModel.findOne({ email })) {
       throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`);
     }
 
-    const user = await userModel.create({
-      email,
-      password: await bcrypt.hash(password, 3),
-      accessLevel: DEFAULT_CREATE_USER_LEVER,
-    });
-    const tokens = tokenService.generateTokens({ ...user });
+    const user = await userModel.create(await computeDataForUserCreation({ email, password, cityBounding }));
+    const tokens = tokenService.generateTokens(transformDBUserToTokenData(user));
     await tokenService.saveToken(user._id, tokens.refreshToken);
 
-    return { ...tokens, user: computeUserForFE(user) };
+    return { ...tokens, ...user };
   }
 
-  async login(email: string, password: string) {
+  async login({ password, email }: Pick<DBUser, 'email' | 'password'>) {
     const user = await userModel.findOne({ email });
 
     if (!user) throw ApiError.BadRequest('Пользователь с таким email не найден');
 
     if (!(await bcrypt.compare(password, user.password))) throw ApiError.BadRequest('Неверный пароль');
 
-    const tokens = tokenService.generateTokens({ ...user });
+    const tokens = tokenService.generateTokens(transformDBUserToTokenData(user));
 
     await tokenService.saveToken(user._id, tokens.refreshToken);
 
-    return { ...tokens, user: computeUserForFE(user) };
+    return { ...tokens, ...user };
   }
 
   async logout(refreshToken: string) {
@@ -46,8 +43,6 @@ class UserService {
   }
 
   async refresh(refreshToken: string) {
-    if (!refreshToken) throw ApiError.UnauthorizedError();
-
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenService.findToken(refreshToken);
 
@@ -57,19 +52,29 @@ class UserService {
 
     if (!user) throw ApiError.UnauthorizedError();
 
-    const tokens = tokenService.generateTokens(user);
+    const tokens = tokenService.generateTokens(transformDBUserToTokenData(user));
 
     await tokenService.saveToken(userData._id, tokens.refreshToken);
 
-    return { ...tokens, user: computeUserForFE(user) };
+    return { ...tokens, ...user };
   }
 
-  async update({ emailForMailings, email }: Pick<User, 'emailForMailings' | 'email'>) {
-    await userModel.updateOne({ email }, { email, emailForMailings });
+  async update(userData: RegistrationData) {
+    return userModel.updateOne({ email: userData.email }, await computeDataForUserCreation(userData));
   }
 
-  async getAll() {
-    return userModel.find().then(r => r.map(({ email, accessLevel }) => ({ email, accessLevel })));
+  async delete(userData: Pick<DBUser, 'email'>) {
+    await userModel.deleteOne(userData);
+
+    return true;
+  }
+
+  getAll() {
+    return userModel.find();
+  }
+
+  _getUserInfo(userData: Pick<DBUser, 'email'>) {
+    return userModel.findOne(userData);
   }
 }
 

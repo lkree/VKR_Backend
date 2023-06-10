@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { isArray, isObject, toCamelCase } from '~/shared/lib/helpers/index.js';
+import { isArray, isObject, toCamelCase } from '~/shared/lib/helpers';
 
 export const call = <T>(resultType: 'text' | 'json', ...props: Parameters<typeof fetch>): Promise<T> =>
   fetch(...props)

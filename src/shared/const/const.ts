@@ -6,3 +6,5 @@ export enum AccessLevel {
   User = 'user',
   Admin = 'admin',
 }
+
+export const SHARED_KEY = 'Общее';
